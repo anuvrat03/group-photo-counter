@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrowdCounter - Group Photo People Counter</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Load face-api.js from CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.2/dist/face-api.min.js"></script>
+    <script defer src="app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1><i class="fa-solid fa-users-viewfinder"></i> CrowdCounter AI</h1>
+            <p>Upload a group photo to automatically detect and count the people instantly.</p>
+        </header>
+
+        <!-- Main Card -->
+        <main class="card">
+            <!-- Upload Box -->
+            <div class="upload-section" id="drop-zone">
+                <input type="file" id="image-upload" accept="image/*" hidden>
+                <div class="upload-prompt" onclick="document.getElementById('image-upload').click()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <span>Drag & drop your group photo here, or <strong>browse</strong></span>
+                </div>
+            </div>
+
+            <!-- Loading Spinner State -->
+            <div id="loader" class="hidden">
+                <div class="spinner"></div>
+                <p id="loading-text">Loading AI Models...</p>
+            </div>
+
+            <!-- Preview & Canvas Workspace -->
+            <div class="workspace hidden" id="workspace">
+                <div class="image-container">
+                    <img id="source-image" alt="Uploaded Group Photo">
+                    <canvas id="overlay-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Results & Action Bar -->
+            <div class="action-bar">
+                <div class="counter-badge">
+                    <span class="label">People Count:</span>
+                    <span id="count-output" class="count-number">0</span>
+                </div>
+                <div class="buttons">
+                    <button id="refresh-btn" class="btn secondary-btn">
+                        <i class="fa-solid fa-rotate-right"></i> Reset
+                    </button>
+                    <button id="reanalyze-btn" class="btn primary-btn" disabled>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Re-scan
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
