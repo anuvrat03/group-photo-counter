@@ -18,7 +18,7 @@ async function loadModels() {
     
     const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.2/model/';
     try {
-        await face-api.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         modelsLoaded = true;
         loader.classList.add('hidden');
     } catch (error) {
@@ -65,18 +65,18 @@ function handleImage(file) {
     reader.readAsDataURL(file);
 }
 
-// Face Detection Core logic
+// Face Detection Core logic (Optimized for dense and small faces)
 async function detectFaces() {
     if (!modelsLoaded) {
-        alert("Models are still loading, please wait a second.");
+        alert("Models are still loading, please wait a moment.");
         return;
     }
 
     loader.classList.remove('hidden');
     loadingText.innerText = "Scanning faces in photo...";
 
-    // Configure detector options (TinyFaceDetector is lightweight & fast)
-    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.3 });
+    // Increased inputSize to 640 and lowered scoreThreshold to 0.25 to catch smaller/crowded faces
+    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.25 });
     const detections = await faceapi.detectAllFaces(sourceImage, options);
 
     loader.classList.add('hidden');
