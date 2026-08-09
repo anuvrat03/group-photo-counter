@@ -11,19 +11,21 @@ const reanalyzeBtn = document.getElementById('reanalyze-btn');
 
 let modelsLoaded = false;
 
-// Load Face-API models from CDN repository
+// Load Face-API models from a stable raw GitHub repository weights mirror
 async function loadModels() {
     loader.classList.remove('hidden');
     loadingText.innerText = "Loading AI Detection Models...";
     
-    const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.2/model/';
+    // Using direct weights from a reliable raw mirror
+    const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights';
     try {
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
         modelsLoaded = true;
         loader.classList.add('hidden');
+        console.log("AI Models Loaded Successfully");
     } catch (error) {
-        console.error(error);
-        loadingText.innerText = "Failed to load models. Check connection.";
+        console.error("Model load error:", error);
+        loadingText.innerText = "Failed to load AI models. Check internet connection.";
     }
 }
 
@@ -65,7 +67,7 @@ function handleImage(file) {
     reader.readAsDataURL(file);
 }
 
-// Face Detection Core logic (Optimized for dense and small faces)
+// Face Detection Core logic
 async function detectFaces() {
     if (!modelsLoaded) {
         alert("Models are still loading, please wait a moment.");
@@ -75,34 +77,39 @@ async function detectFaces() {
     loader.classList.remove('hidden');
     loadingText.innerText = "Scanning faces in photo...";
 
-    // Increased inputSize to 640 and lowered scoreThreshold to 0.25 to catch smaller/crowded faces
-    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 640, scoreThreshold: 0.25 });
-    const detections = await faceapi.detectAllFaces(sourceImage, options);
+    try {
+        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 });
+        const detections = await faceapi.detectAllFaces(sourceImage, options);
 
-    loader.classList.add('hidden');
-    countOutput.innerText = detections.length;
-    reanalyzeBtn.removeAttribute('disabled');
+        loader.classList.add('hidden');
+        countOutput.innerText = detections.length;
+        reanalyzeBtn.removeAttribute('disabled');
 
-    // Match canvas dimensions to actual rendered image size
-    overlayCanvas.width = sourceImage.width;
-    overlayCanvas.height = sourceImage.height;
-    
-    const displaySize = { width: sourceImage.width, height: sourceImage.height };
-    const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        // Match canvas dimensions to actual rendered image size
+        overlayCanvas.width = sourceImage.width;
+        overlayCanvas.height = sourceImage.height;
+        
+        const displaySize = { width: sourceImage.width, height: sourceImage.height };
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
 
-    const ctx = overlayCanvas.getContext('2d');
-    ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+        const ctx = overlayCanvas.getContext('2d');
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-    // Draw stylish boxes over detected faces
-    resizedDetections.forEach((detection, index) => {
-        const box = detection.box;
-        const drawBox = new faceapi.draw.DrawBox(box, { 
-            boxColor: '#ec4899', 
-            lineWidth: 3,
-            label: `#${index + 1}` 
+        // Draw stylish boxes over detected faces
+        resizedDetections.forEach((detection, index) => {
+            const box = detection.box;
+            const drawBox = new faceapi.draw.DrawBox(box, { 
+                boxColor: '#ec4899', 
+                lineWidth: 3,
+                label: `#${index + 1}` 
+            });
+            drawBox.draw(overlayCanvas);
         });
-        drawBox.draw(overlayCanvas);
-    });
+    } catch (err) {
+        console.error("Detection error:", err);
+        loader.classList.add('hidden');
+        alert("Error analyzing image. Try a simpler or smaller photo.");
+    }
 }
 
 // Re-scan trigger
